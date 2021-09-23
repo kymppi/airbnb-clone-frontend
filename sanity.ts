@@ -1,23 +1,20 @@
+import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import fetch from 'isomorphic-unfetch';
+import { createImageUrlBuilder } from 'next-sanity';
 import { createClient } from 'sanity-codegen';
 import { Documents } from './sanity-types';
 
-export const sanityClient = createClient<Documents>({
-  /**
-   * Find your project ID and dataset in `sanity.json` in your studio project.
-   * These are considered “public”, but you can use environment variables
-   * if you want differ between local dev and production.
-   *
-   * https://nextjs.org/docs/basic-features/environment-variables
-   **/
+const config = {
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
   apiVersion: '2021-03-25',
-  /**
-   * Set useCdn to `false` if your application require the freshest possible
-   * data always (potentially slightly slower and a bit more expensive).
-   * Authenticated request (like preview) will always bypass the CDN
-   **/
   useCdn: process.env.NODE_ENV === 'production',
+};
+
+export const sanityClient = createClient<Documents>({
+  ...config,
   fetch: fetch,
 });
+
+export const urlFor = (source: SanityImageSource) =>
+  createImageUrlBuilder(config).image(source);
